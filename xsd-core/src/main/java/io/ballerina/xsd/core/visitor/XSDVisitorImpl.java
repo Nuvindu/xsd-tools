@@ -833,12 +833,21 @@ public class XSDVisitorImpl implements XSDVisitor {
     }
 
     private void handleTypedElement(String elementName, Node typeNode, StringBuilder builder) {
+        String originalTypeNameWithPrefix = typeNode.getNodeValue();
+        String originalTypeName = extractType(typeNode);
         String typeName = deriveType(typeNode);
         elementName = appendElementNameWithSuffix(elementName, typeName, builder);
-        if (!isSimpleType(typeName)) {
-            rootElements.put(elementName, typeName);
+        boolean isBuiltInType = originalTypeNameWithPrefix != null && originalTypeNameWithPrefix.contains(COLON);
+        
+        if (!isBuiltInType) {
+            rootElements.put(elementName, originalTypeName);
+            appendRecordStructure(originalTypeName, builder);
+        } else {
+            if (!isSimpleType(originalTypeName)) {
+                rootElements.put(elementName, typeName);
+            }
+            appendRecordStructure(typeName, builder);
         }
-        appendRecordStructure(typeName, builder);
     }
 
     private String appendElementNameWithSuffix(String elementName, String typeName, StringBuilder builder) {
@@ -853,7 +862,7 @@ public class XSDVisitorImpl implements XSDVisitor {
 
     private void appendRecordStructure(String typeName, StringBuilder builder) {
         builder.append(WHITESPACE).append(RECORD).append(WHITESPACE).append(OPEN_BRACES).append(VERTICAL_BAR)
-                .append(WHITESPACE).append(typeGenerator(typeName)).append(WHITESPACE).append(CONTENT_FIELD)
+                .append(WHITESPACE).append(typeName).append(WHITESPACE).append(CONTENT_FIELD)
                 .append(SEMICOLON).append(WHITESPACE).append(VERTICAL_BAR).append(CLOSE_BRACES);
     }
 

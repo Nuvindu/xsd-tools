@@ -80,8 +80,16 @@ public class Utils {
 
     static void processSingleTypeElements(Map<String, MemberNode> nodes,
                                           String element, String type, String[] tokens, String contentField) {
-        String token = (!nodes.containsKey(type) || nodes.get(type).node().toString().contains(XSDVisitorImpl.ENUM))
-                ? STRING : tokens[tokens.length - 2];
+        String token;
+        if (nodes.containsKey(type) && !nodes.get(type).node().toString().contains(XSDVisitorImpl.ENUM)) {
+            token = extractType(tokens);
+        } else if (nodes.containsKey(type) && nodes.get(type).node().toString().contains(XSDVisitorImpl.ENUM)) {
+            token = STRING;
+        } else {
+            // If type is not found in nodes, preserve the original type name
+            // This handles cases like union types that may not be in the nodes map yet
+            token = type;
+        }
         if (nodes.containsKey(element)) {
             String rootElement = nodes.get(element).node().toString()
                     .replace(type + WHITESPACE + contentField, token + WHITESPACE + contentField);
@@ -146,6 +154,19 @@ public class Utils {
                 return current;
             }
             previous = current;
+        }
+        return null;
+    }
+
+    static String extractType(String[] values) {
+        String previous = null;
+        String current = null;
+        for (String next : values) {
+            if (TYPE.equals(previous)) {
+                return next.replaceAll("[^a-zA-Z0-9_| ]", "");
+            }
+            previous = current;
+            current = next;
         }
         return null;
     }

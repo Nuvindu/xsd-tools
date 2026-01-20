@@ -58,7 +58,6 @@ import static io.ballerina.xsd.core.visitor.Utils.CLOSE_BRACES;
 import static io.ballerina.xsd.core.visitor.Utils.COMMA;
 import static io.ballerina.xsd.core.visitor.Utils.OPEN_BRACES;
 import static io.ballerina.xsd.core.visitor.Utils.QUOTATION_MARK;
-import static io.ballerina.xsd.core.visitor.Utils.STRING;
 import static io.ballerina.xsd.core.visitor.Utils.WHITESPACE;
 import static io.ballerina.xsd.core.visitor.XSDVisitorImpl.EMPTY_STRING;
 import static io.ballerina.xsd.core.visitor.XSDVisitorImpl.ENUM;
@@ -354,8 +353,10 @@ public final class XSDToRecord {
                     io.ballerina.xsd.core.Utils.processRecordTypeElements(nodes, element, type, CONTENT_FIELD);
                 }
             } else if (nodes.containsKey(element)) {
-                String rootElement = nodes.get(element).node().toString().replace(type, STRING);
-                ModuleMemberDeclarationNode moduleNode = NodeParser.parseModuleMemberDeclaration(rootElement);
+                // Don't replace the type with STRING, preserve the original type name
+                // This allows custom types like union types to be used as content field types
+                ModuleMemberDeclarationNode moduleNode = NodeParser.parseModuleMemberDeclaration(
+                    nodes.get(element).node().toString());
                 nodes.put(element, new MemberNode(moduleNode, Kind.ELEMENT));
             }
         }
