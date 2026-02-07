@@ -135,6 +135,7 @@ public class XSDVisitorImpl implements XSDVisitor {
     public static final String ANY_ELEMENT = "anyElement";
     public static final String PROCESS_CONTENTS = "processContents";
     public static final String ANY_ANNOTATION = "@xmldata:Any";
+    private final boolean applyComplexAnnotations;
     private final ArrayList<String> imports = new ArrayList<>();
     private final Map<String, XSDElement> extensions = new LinkedHashMap<>();
     private final Map<String, String> rootElements = new LinkedHashMap<>();
@@ -150,6 +151,19 @@ public class XSDVisitorImpl implements XSDVisitor {
 
     // Metadata to keep resolved name to original name
     private final Map<String, String> resolvedNameMeta = new HashMap<>();
+
+    public XSDVisitorImpl() {
+        this(true);
+    }
+
+    public XSDVisitorImpl(boolean applyComplexAnnotations) {
+        this.applyComplexAnnotations = applyComplexAnnotations;
+    }
+
+    @Override
+    public boolean isApplyComplexAnnotations() {
+        return applyComplexAnnotations;
+    }
 
     @Override
     public String visit(Element element) throws Exception {
@@ -494,6 +508,21 @@ public class XSDVisitorImpl implements XSDVisitor {
     }
 
     public String visitChoice(Node node) throws Exception {
+        if (!applyComplexAnnotations) {
+            StringBuilder builder = new StringBuilder();
+            NodeList childNodes = node.getChildNodes();
+            for (Node childNode : asIterable(childNodes)) {
+                Optional<XSDComponent> component = XSDFactory.generateComponents(childNode);
+                if (component.isEmpty()) {
+                    continue;
+                }
+                component.get().setSubType(true);
+                component.get().setOptional(true);
+                builder.append(addNamespace(this, getTargetNamespace()));
+                builder.append(component.get().accept(this));
+            }
+            return builder.toString();
+        }
         StringBuilder builder = new StringBuilder();
         NodeList childNodes = node.getChildNodes();
         StringBuilder stringBuilder = new StringBuilder();
@@ -515,6 +544,9 @@ public class XSDVisitorImpl implements XSDVisitor {
     }
 
     public String visitSequence(Node node, boolean isOptional) throws Exception {
+        if (!applyComplexAnnotations) {
+            return visitAllContent(node, isOptional);
+        }
         StringBuilder builder = new StringBuilder();
         NodeList childNodes = node.getChildNodes();
         StringBuilder stringBuilder = new StringBuilder();

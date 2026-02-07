@@ -81,6 +81,10 @@ public class XsdCmd implements BLauncherCmd {
             "client and record types are generated.")
     private String outputPath = "";
 
+    @CommandLine.Option(names = {"-c", "--with-complex-annotations"},
+            description = "Apply @xmldata:Sequence and @xmldata:Choice annotations")
+    private boolean applyComplexAnnotations;
+
     public XsdCmd() {
         this.outStream = System.err;
         this.exitWhenFinish = true;
@@ -161,7 +165,7 @@ public class XsdCmd implements BLauncherCmd {
         }
         String xmlFileContent = Files.readString(filePath);
         Document document = parseXSD(xmlFileContent);
-        Response result = XSDToRecord.convert(document);
+        Response result = XSDToRecord.convert(document, applyComplexAnnotations);
         if (!result.diagnostics().isEmpty()) {
             result.diagnostics().forEach(xsdDiagnostic -> outStream.println(xsdDiagnostic.toString()));
             exitOnError();
@@ -191,7 +195,7 @@ public class XsdCmd implements BLauncherCmd {
                 outStream.printf("XSD file: %s contains errors.%nError: %s", fileName, e.getLocalizedMessage());
             }
         }
-        Map<String, Response> result = XSDToRecord.convert(documents);
+        Map<String, Response> result = XSDToRecord.convert(documents, applyComplexAnnotations);
         for (Map.Entry<String, Response> entry : result.entrySet()) {
             if (entry.getValue().diagnostics().isEmpty()) {
                 writeSourceToFiles(outputDirPath, entry.getValue(), entry.getKey());

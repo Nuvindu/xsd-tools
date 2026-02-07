@@ -101,7 +101,11 @@ public final class XSDToRecord {
      * @throws Exception if an error occurs while parsing the XSD content
      */
     public static Response convert(Document document) throws Exception {
-        XSDVisitor xsdVisitor = new XSDVisitorImpl();
+        return convert(document, true);
+    }
+
+    public static Response convert(Document document, boolean applyComplexAnnotations) throws Exception {
+        XSDVisitor xsdVisitor = new XSDVisitorImpl(applyComplexAnnotations);
         Map<String, MemberNode> nodes = generateNodes(document, xsdVisitor);
         NodeResponse response = generateTypes(xsdVisitor, nodes);
         String generatedTypes = response.types() != null ? formatModuleParts(response.types()) : EMPTY_STRING;
@@ -115,8 +119,13 @@ public final class XSDToRecord {
      * @return a map of file names and their corresponding records
      */
     public static Map<String, Response> convert(Map<Document, String> documents) throws Exception {
+        return convert(documents, true);
+    }
+
+    public static Map<String, Response> convert(Map<Document, String> documents,
+                                                boolean applyComplexAnnotations) throws Exception {
         Map<String, NodeResponse> typesMap = new LinkedHashMap<>();
-        XSDVisitor xsdVisitor = new XSDVisitorImpl();
+        XSDVisitor xsdVisitor = new XSDVisitorImpl(applyComplexAnnotations);
         ArrayList<String> existingTypes = new ArrayList<>();
 
         for (Map.Entry<Document, String> entry : documents.entrySet()) {
@@ -169,7 +178,11 @@ public final class XSDToRecord {
      * @return a map of element names and their corresponding record nodes
      */
     public static NodeResponse generateNodes(String... xsdContents) {
-        XSDVisitor xsdVisitor = new XSDVisitorImpl();
+        return generateNodes(true, xsdContents);
+    }
+
+    public static NodeResponse generateNodes(boolean applyComplexAnnotations, String... xsdContents) {
+        XSDVisitor xsdVisitor = new XSDVisitorImpl(applyComplexAnnotations);
         Map<String, MemberNode> typesMap = new LinkedHashMap<>();
         ArrayList<String> existingTypes = new ArrayList<>();
         int index = 0;
@@ -206,7 +219,12 @@ public final class XSDToRecord {
      * @return a {@link NodeResponse} containing the generated nodes as a syntax tree and diagnostics
      */
     public static NodeResponse generateNodes(ArrayList<String> xsdContents) {
-        XSDVisitor xsdVisitor = new XSDVisitorImpl();
+        return generateNodes(xsdContents, true);
+    }
+
+    public static NodeResponse generateNodes(ArrayList<String> xsdContents,
+                                             boolean applyComplexAnnotations) {
+        XSDVisitor xsdVisitor = new XSDVisitorImpl(applyComplexAnnotations);
         Map<String, MemberNode> typesMap = new LinkedHashMap<>();
         ArrayList<String> existingTypes = new ArrayList<>();
         int index = 0;

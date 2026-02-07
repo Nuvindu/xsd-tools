@@ -44,6 +44,7 @@ public interface XSDVisitor {
     String visit(SimpleType element, boolean isSubType) throws Exception;
     String visit(AttributeGroup attributeGroup) throws Exception;
     String visit(Any any) throws Exception;
+    boolean isApplyComplexAnnotations();
     void setTargetNamespace(String targetNamespace);
     String getTargetNamespace();
     ArrayList<String> getImports();
