@@ -7,7 +7,7 @@ public type ActiveCurrencyAndAmount_SimpleType decimal;
 public type ActiveCurrencyAndAmount record {|
     decimal \#content;
     @xmldata:Attribute
-    ActiveCurrencyCode Ccy;
+    ActiveCurrencyCode Ccy?;
 |};
 
 @xmldata:Namespace {uri: "http://namespace.org/"}
@@ -16,13 +16,13 @@ public type ActiveCurrencyCode string;
 @xmldata:Namespace {uri: "http://namespace.org/"}
 public type Root record {|
     @xmldata:Attribute
-    ActiveCurrencyCode Ccy;
+    ActiveCurrencyCode Ccy?;
 |};
 
 @xmldata:Namespace {uri: "http://namespace.org/"}
 public type Root2 record {|
     @xmldata:Attribute
-    ActiveCurrencyCode Ccy;
+    ActiveCurrencyCode Ccy?;
 |};
 
 @xmldata:Namespace {uri: "http://namespace.org/"}

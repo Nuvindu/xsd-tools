@@ -423,10 +423,9 @@ public class XSDVisitorImpl implements XSDVisitor {
             builder.append(deriveType(typeNode)).append(WHITESPACE);
         }
         builder.append(handleKeywordNames(nameNode));
-        Node attributeType = attribute.getAttributes().getNamedItem(USE);
         if (defaultNode != null) {
             builder.append(generateDefaultValue(deriveType(typeNode), defaultNode.getNodeValue()));
-        } else if (attributeType != null && !attributeType.getNodeValue().equals(REQUIRED)) {
+        } else {
             builder.append(QUESTION_MARK);
         }
         builder.append(SEMICOLON);

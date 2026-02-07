@@ -5,7 +5,7 @@ public type Product record {|
     @xmldata:Sequence {minOccurs: 1, maxOccurs: 1}
     SequenceGroup sequenceGroup;
     @xmldata:Attribute
-    string id;
+    string id?;
     @xmldata:Attribute
     string version?;
     @xmldata:Attribute
@@ -17,13 +17,13 @@ public type Order record {|
     @xmldata:Sequence {minOccurs: 1, maxOccurs: 1}
     SequenceGroup1 sequenceGroup1;
     @xmldata:Attribute
-    string id;
+    string id?;
     @xmldata:Attribute
     string version?;
     @xmldata:Attribute
     string timestamp?;
     @xmldata:Attribute
-    string status;
+    string status?;
 |};
 
 @xmldata:Namespace {uri: "http://example.com/schema"}

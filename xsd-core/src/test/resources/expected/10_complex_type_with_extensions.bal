@@ -3,17 +3,17 @@ import ballerina/data.xmldata;
 @xmldata:Namespace {uri: "http://namespace.org/"}
 public type PersonBase record {|
     @xmldata:Attribute
-    int id;
+    int id?;
     @xmldata:Attribute
-    string name;
+    string name?;
 |};
 
 @xmldata:Namespace {uri: "http://namespace.org/"}
 public type Employee record {|
     @xmldata:Attribute
-    int id;
+    int id?;
     @xmldata:Attribute
-    string name;
+    string name?;
     @xmldata:Attribute
     int age?;
     @xmldata:Attribute
@@ -32,7 +32,7 @@ public type Employee1 record {|
 @xmldata:Namespace {uri: "http://namespace.org/"}
 public type EmployeePerson record {|
     @xmldata:Attribute
-    int id;
+    int id?;
     @xmldata:Attribute
-    string name;
+    string name?;
 |};

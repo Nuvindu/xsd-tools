@@ -5,9 +5,9 @@ public type PersonBase record {|
     @xmldata:Sequence {minOccurs: 1, maxOccurs: 1}
     SequenceGroup3 sequenceGroup3;
     @xmldata:Attribute
-    int id;
+    int id?;
     @xmldata:Attribute
-    string name;
+    string name?;
 |};
 
 @xmldata:Namespace {uri: "http://namespace.org/"}
@@ -15,9 +15,9 @@ public type Employee record {|
     @xmldata:Sequence {minOccurs: 1, maxOccurs: 1}
     SequenceGroup3 sequenceGroup3;
     @xmldata:Attribute
-    int id;
+    int id?;
     @xmldata:Attribute
-    string name;
+    string name?;
     @xmldata:Attribute
     int age?;
     @xmldata:Attribute

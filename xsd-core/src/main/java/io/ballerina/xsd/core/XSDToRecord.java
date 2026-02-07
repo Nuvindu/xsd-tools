@@ -166,8 +166,13 @@ public final class XSDToRecord {
      * @throws Exception if an error occurs while parsing the XSD content
      */
     public static Map<String, MemberNode> generateNodes(String xsdContent) throws Exception {
+        return generateNodes(xsdContent, true);
+    }
+
+    public static Map<String, MemberNode> generateNodes(String xsdContent,
+                                                        boolean applyComplexAnnotations) throws Exception {
         Document document = parseXSD(xsdContent);
-        XSDVisitor xsdVisitor = new XSDVisitorImpl();
+        XSDVisitor xsdVisitor = new XSDVisitorImpl(applyComplexAnnotations);
         return generateNodes(document, xsdVisitor);
     }
 
