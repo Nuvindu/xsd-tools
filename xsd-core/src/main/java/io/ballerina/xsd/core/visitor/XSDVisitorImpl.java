@@ -34,13 +34,16 @@ import org.w3c.dom.NodeList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static io.ballerina.xsd.core.Utils.resolveNameConflicts;
 import static io.ballerina.xsd.core.XSDToRecord.STRICT_ANY_PLACEHOLDER;
+import static io.ballerina.xsd.core.XSDToRecord.XMLDATA_NAME_ANNOTATION;
 import static io.ballerina.xsd.core.diagnostic.DiagnosticMessage.xsdToBallerinaError;
 import static io.ballerina.xsd.core.visitor.Utils.ANYDATA;
 import static io.ballerina.xsd.core.visitor.Utils.MAX_OCCURS;
@@ -151,6 +154,7 @@ public class XSDVisitorImpl implements XSDVisitor {
 
     // Metadata to keep resolved name to original name
     private final Map<String, String> resolvedNameMeta = new HashMap<>();
+    private final Set<String> currentRecordFieldNames = new HashSet<>();
 
     public XSDVisitorImpl() {
         this(true);
@@ -220,7 +224,9 @@ public class XSDVisitorImpl implements XSDVisitor {
         } else if (typeNode != null && node.hasAttributes()) {
             handleFixedValues(node, builder, typeNode);
             handleMaxOccurrences(node, builder);
-            builder.append(resolveNames(Utils.handleKeywordNames(nameNode)));
+            String fieldName = resolveNames(Utils.handleKeywordNames(nameNode));
+            currentRecordFieldNames.add(fieldName);
+            builder.append(fieldName);
             handleMinOccurrences(element, builder);
             handleDefaultValues(node, builder, typeNode);
         }
@@ -249,6 +255,7 @@ public class XSDVisitorImpl implements XSDVisitor {
         if (element.isSubType()) {
             return this.visit(element, true);
         }
+        currentRecordFieldNames.clear();
         Node node = element.getNode();
         StringBuilder builder = new StringBuilder();
         builder.append(addNamespace(this, getTargetNamespace()));
@@ -265,6 +272,7 @@ public class XSDVisitorImpl implements XSDVisitor {
 
     @Override
     public String visit(ComplexType element, boolean isSubType) throws Exception {
+        currentRecordFieldNames.clear();
         Node node = element.getNode();
         StringBuilder builder = new StringBuilder();
         builder.append(RECORD).append(WHITESPACE).append(OPEN_BRACES).append(VERTICAL_BAR).append(WHITESPACE);
@@ -410,6 +418,13 @@ public class XSDVisitorImpl implements XSDVisitor {
         if (nameNode == null) {
             throw new Exception(String.format(ATTRIBUTE_NOT_FOUND_ERROR, NAME));
         }
+        String fieldName = handleKeywordNames(nameNode);
+        if (currentRecordFieldNames.contains(fieldName)) {
+            String resolvedName = resolveFieldNameConflict(fieldName);
+            builder.append(String.format(XMLDATA_NAME_ANNOTATION, fieldName)).append(WHITESPACE);
+            fieldName = resolvedName;
+        }
+        currentRecordFieldNames.add(fieldName);
         builder.append(ATTRIBUTE_ANNOTATION).append(WHITESPACE);
         Node fixedNode = attribute.getAttributes().getNamedItem(FIXED);
         Node defaultNode = attribute.getAttributes().getNamedItem(DEFAULT);
@@ -417,12 +432,12 @@ public class XSDVisitorImpl implements XSDVisitor {
             builder.append(deriveType(typeNode)).append(WHITESPACE);
         } else if (fixedNode != null) {
             builder.append(generateFixedValue(deriveType(typeNode), fixedNode.getNodeValue())).append(WHITESPACE);
-        } else if (attribute.hasChildNodes()) {
+        } else if (attribute.hasChildNodes() && typeNode == null) {
             builder.append(visitAttributeChildNodes(attribute.getChildNodes())).append(WHITESPACE);
         } else {
             builder.append(deriveType(typeNode)).append(WHITESPACE);
         }
-        builder.append(handleKeywordNames(nameNode));
+        builder.append(fieldName);
         if (defaultNode != null) {
             builder.append(generateDefaultValue(deriveType(typeNode), defaultNode.getNodeValue()));
         } else {
@@ -597,6 +612,16 @@ public class XSDVisitorImpl implements XSDVisitor {
             builder.append(component.get().accept(this));
         }
         return builder.toString();
+    }
+
+    private String resolveFieldNameConflict(String name) {
+        String baseName = name;
+        int counter = 1;
+        while (currentRecordFieldNames.contains(name)) {
+            name = baseName + counter;
+            counter++;
+        }
+        return name;
     }
 
     private static String resolveTypeNameConflicts(String name, String typeName) {

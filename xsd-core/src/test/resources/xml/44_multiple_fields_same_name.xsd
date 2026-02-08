@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb" xmlns:tns="http://www.opentravel.org/OTA/2003/05" targetNamespace="http://www.opentravel.org/OTA/2003/05" elementFormDefault="qualified" jaxb:version="3.0">
+	<xs:element name="NotificationRequest" type="ManagedInCrsOnly"/>
+	<xs:complexType name="ManagedInCrsOnly">
+		<xs:sequence>
+			<xs:element name="StayRestrictions" type="tns:ManagedStayRestrictionTypes" minOccurs="0">
+				<xs:annotation>
+					<xs:appinfo>
+						<jaxb:property name="stayRestrictionDetails"/>
+					</xs:appinfo>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="GuaranteePolicy" type="xs:boolean" use="required"/>
+		<xs:attribute name="CancellationPolicy" type="xs:boolean" use="required"/>
+		<xs:attribute name="RateSeason" type="xs:boolean" use="required"/>
+		<xs:attribute name="StayRestrictions" type="xs:boolean" use="required">
+			<xs:annotation>
+				<xs:appinfo>
+					<jaxb:property name="stayRestrictionsFlag"/>
+				</xs:appinfo>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:complexType name="ManagedStayRestrictionTypes">
+		<xs:attribute name="Closed" type="xs:boolean" use="required"/>
+		<xs:attribute name="NoArrival" type="xs:boolean" use="required"/>
+		<xs:attribute name="NoDeparture" type="xs:boolean" use="required"/>
+		<xs:attribute name="NoSell" type="xs:boolean" use="required"/>
+	</xs:complexType>
+</xs:schema>

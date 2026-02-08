@@ -19,6 +19,7 @@
 package io.ballerina.xsd.core;
 
 import io.ballerina.xsd.core.response.NodeResponse;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.testng.Assert;
@@ -108,4 +109,15 @@ public class XSDToRecordTest {
         String expectedValue = Files.readString(expected);
         Assert.assertEquals(generatedTypes, expectedValue);
     }
+
+     @Test
+     public void test() throws Exception {
+         Path xsdPath = RES_DIR.resolve(XML_DIR).resolve("44_multiple_fields_same_name.xsd");
+         String[] xsdContents = new String[]{Files.readString(xsdPath)};
+         NodeResponse result = XSDToRecord.generateNodes(xsdContents);
+         String generatedTypes = Utils.formatModuleParts(result.types());
+         Path expected = RES_DIR.resolve(EXPECTED_DIR).resolve("44_multiple_fields_same_name.bal");
+         String expectedValue = Files.readString(expected);
+         Assert.assertEquals(generatedTypes, expectedValue);
+     }
 }
