@@ -489,13 +489,38 @@ public class XSDVisitorImpl implements XSDVisitor {
         StringBuilder builder = new StringBuilder();
         NodeList childNodes = node.getChildNodes();
         for (Node childNode : asIterable(childNodes)) {
-            if (childNode.getNodeType() == Node.ELEMENT_NODE && EXTENSION.equals(childNode.getLocalName())) {
+            if (childNode.getNodeType() != Node.ELEMENT_NODE) {
+                continue;
+            }
+            if (EXTENSION.equals(childNode.getLocalName())) {
                 String base = deriveType(childNode.getAttributes().getNamedItem(BASE));
                 builder.append(visitExtension(childNode));
                 Node nameNode = node.getParentNode().getAttributes().getNamedItem(NAME);
                 if (nameNode != null) {
                     String parentNodeName = deriveType(node.getParentNode().getAttributes().getNamedItem(NAME));
                     extensions.put(parentNodeName, new XSDElement(base, Kind.COMPLEX_TYPE));
+                }
+            } else if (RESTRICTION.equals(childNode.getLocalName())) {
+                Node baseNode = childNode.getAttributes().getNamedItem(BASE);
+                if (baseNode != null) {
+                    String base = deriveType(baseNode);
+                    Node nameNode = node.getParentNode().getAttributes().getNamedItem(NAME);
+                    if (nameNode != null) {
+                        String parentNodeName = deriveType(node.getParentNode().getAttributes().getNamedItem(NAME));
+                        extensions.put(parentNodeName, new XSDElement(base, Kind.COMPLEX_TYPE));
+                    } else {
+                        Node elementNode = node.getParentNode().getParentNode();
+                        String elementName = null;
+                        if (elementNode != null && elementNode.getAttributes() != null) {
+                            Node elemNameNode = elementNode.getAttributes().getNamedItem(NAME);
+                            if (elemNameNode != null) {
+                                elementName = handleKeywordNames(elemNameNode);
+                            }
+                        }
+                        if (!base.equals(elementName)) {
+                            builder.append("*").append(base).append(SEMICOLON);
+                        }
+                    }
                 }
             }
         }
