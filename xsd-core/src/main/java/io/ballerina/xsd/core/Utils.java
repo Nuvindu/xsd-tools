@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static io.ballerina.xsd.core.visitor.XSDVisitorImpl.CLOSE_BRACES;
+import static io.ballerina.xsd.core.visitor.XSDVisitorImpl.QUESTION_MARK;
 import static io.ballerina.xsd.core.visitor.XSDVisitorImpl.RECORD_WITH_OPEN_BRACE;
 import static io.ballerina.xsd.core.visitor.XSDVisitorImpl.SEMICOLON;
 import static io.ballerina.xsd.core.visitor.XSDVisitorImpl.STRING;
@@ -72,7 +73,7 @@ public class Utils {
             String fields = extractSubstring(nodes.get(type).node().toString(), RECORD_WITH_OPEN_BRACE,
                     VERTICAL_BAR + CLOSE_BRACES + SEMICOLON, contentField);
             String extendedValue = nodes.get(element).node()
-                    .toString().replace(type + WHITESPACE + contentField + SEMICOLON, fields);
+                    .toString().replace(type + WHITESPACE + contentField + QUESTION_MARK + SEMICOLON, fields);
             ModuleMemberDeclarationNode moduleNode = NodeParser.parseModuleMemberDeclaration(extendedValue);
             nodes.put(element, new MemberNode(moduleNode, Kind.ELEMENT));
         }
@@ -92,7 +93,7 @@ public class Utils {
     static String extractSubstring(String baseString, String startToken, String endToken, String contentField) {
         if (!baseString.contains(startToken)) {
             return baseString.split(WHITESPACE)[baseString.split(WHITESPACE).length - 2] +
-                    WHITESPACE + contentField + SEMICOLON;
+                    WHITESPACE + contentField + QUESTION_MARK + SEMICOLON;
         }
         int startIndex = baseString.indexOf(startToken) + startToken.length();
         int endIndex = baseString.indexOf(endToken, startIndex);
