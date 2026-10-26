@@ -458,6 +458,10 @@ public class XSDVisitorImpl implements XSDVisitor {
         Node nameNode = attribute.getAttributes().getNamedItem(NAME);
         Node typeNode = attribute.getAttributes().getNamedItem(TYPE);
         if (nameNode == null) {
+            Node refNode = attribute.getAttributes().getNamedItem(REF);
+            if (refNode != null) {
+                return visitAttributeRef(attribute, refNode);
+            }
             throw new XSDValidationException(String.format(ATTRIBUTE_NOT_FOUND_ERROR, NAME));
         }
         if (isAttributeQualified(attribute)) {
@@ -480,6 +484,42 @@ public class XSDVisitorImpl implements XSDVisitor {
         if (defaultNode != null) {
             builder.append(generateDefaultValue(deriveType(typeNode), defaultNode.getNodeValue()));
         } else if (attributeType == null || !attributeType.getNodeValue().equals(REQUIRED)) {
+            builder.append(QUESTION_MARK);
+        }
+        builder.append(SEMICOLON);
+        return builder.toString();
+    }
+
+    private String visitAttributeRef(Node attribute, Node refNode) {
+        StringBuilder builder = new StringBuilder();
+        String refValue = refNode.getNodeValue();
+        String localName = refValue.contains(COLON)
+                ? refValue.substring(refValue.indexOf(COLON) + 1)
+                : refValue;
+        if (isAttributeQualified(attribute)) {
+            builder.append(addNamespace(this, getTargetNamespace()));
+        }
+        builder.append(ATTRIBUTE_ANNOTATION).append(WHITESPACE);
+        Node typeNode = attribute.getAttributes().getNamedItem(TYPE);
+        Node fixedNode = attribute.getAttributes().getNamedItem(FIXED);
+        Node defaultNode = attribute.getAttributes().getNamedItem(DEFAULT);
+        String type = deriveType(typeNode);
+        if (defaultNode != null) {
+            builder.append(type).append(WHITESPACE);
+        } else if (fixedNode != null) {
+            builder.append(generateFixedValue(type, fixedNode.getNodeValue())).append(WHITESPACE);
+        } else if (attribute.hasChildNodes()) {
+            builder.append(visitAttributeChildNodes(attribute.getChildNodes())).append(WHITESPACE);
+        } else {
+            builder.append(type).append(WHITESPACE);
+        }
+        String fieldName = SyntaxInfo.isKeyword(localName)
+                ? SINGLE_QUOTE + localName : localName;
+        builder.append(fieldName);
+        Node useNode = attribute.getAttributes().getNamedItem(USE);
+        if (defaultNode != null) {
+            builder.append(generateDefaultValue(type, defaultNode.getNodeValue()));
+        } else if (useNode == null || !useNode.getNodeValue().equals(REQUIRED)) {
             builder.append(QUESTION_MARK);
         }
         builder.append(SEMICOLON);
