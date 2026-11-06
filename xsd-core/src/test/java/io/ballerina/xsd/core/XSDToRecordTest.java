@@ -114,7 +114,9 @@ public class XSDToRecordTest {
             new Object[] {new String[] {"56_attribute_form_default_qualified.xsd"},
                     "56_attribute_form_default_qualified.bal"},
             new Object[] {new String[] {"57_attribute_with_ref.xsd"},
-                    "57_attribute_with_ref.bal"}
+                    "57_attribute_with_ref.bal"},
+            new Object[] {new String[] {"59_ref_element_with_max_occurs.xsd"},
+                    "59_ref_element_with_max_occurs.bal"}
         );
     }
 
